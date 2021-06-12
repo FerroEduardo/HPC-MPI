@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <ctime>
 #include <fstream>
+#include <cstring>
 #define ALING 64
 using namespace std;
 int  main (int ac, char **av){
