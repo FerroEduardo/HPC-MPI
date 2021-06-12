@@ -8,7 +8,7 @@
             "defines": [],
             "compilerPath": "/usr/bin/mpic++",
             "cStandard": "c11",
-            "cppStandard": "gnu++14",
+            "cppStandard": "c++11",
             "intelliSenseMode": "clang-x64"
         }
     ],
