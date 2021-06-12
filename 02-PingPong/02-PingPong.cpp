@@ -28,7 +28,7 @@ int  main (int ac, char **av){
    MPI_Comm_rank(MPI_COMM_WORLD,&m_pid);
    MPI_Get_processor_name(m_hostname, &m_namelen);
 
-   cout << m_hostname << " started" << endl;
+   cout << m_hostname << ", m_pid: " << m_pid << " started" << endl;
    if (m_pid == 0)
       cout << "Tamanho do vetor: " << m_vetSize << " \tEspaço em memória: " << m_vetSize * sizeof(int64_t) << endl;
 
@@ -37,20 +37,23 @@ int  main (int ac, char **av){
 
 
    if (m_pid == 0){
+      cout << "m_pid 0" << endl;
      for (int64_t i = 0; i < m_vetSize; i++){
         m_vet[i] = static_cast<unsigned char> ( rand() % INT64_MAX);
+        cout << m_vet[i] << " " << ends;
      }//end-for (int64_t = i; i < m_vetSize; i++){
+      cout << endl;
 
      elapsedtime = MPI_Wtime();
      MPI_Send(m_vet, m_vetSize * sizeof(int64_t), MPI_BYTE, 1, 0, MPI_COMM_WORLD);
      elapsedtime =  MPI_Wtime() - elapsedtime;
    }else  if (m_pid == 1){
         MPI_Recv(m_vet, m_vetSize * sizeof(int64_t), MPI_BYTE, 0, 0, MPI_COMM_WORLD, &m_status);
-        /*
+        cout << "m_pid 1" << endl;
         for (int64_t i = 0; i < m_vetSize; i++){
-           cout << m_vet[i] << endl;
+           cout << m_vet[i] << " " << ends;
         }//
-        */
+        cout << endl;
    }
 /*
    MPI_Barrier(MPI_COMM_WORLD);
@@ -85,7 +88,7 @@ int  main (int ac, char **av){
    if (m_pid == 0){
       string filename = string(m_hostname) + ".sync.log";
       mLog.open(filename, fstream::app | fstream::out);
-      cout << elapsedtime << endl;
+      cout << "elapsed: "  << elapsedtime/1000 << "ms" << endl;
       mLog << m_vetSize * sizeof(int64_t) << ";" << elapsedtime << endl;
       mLog.close();
       cout << m_hostname << endl;
