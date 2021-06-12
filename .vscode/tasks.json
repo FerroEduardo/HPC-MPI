@@ -11,7 +11,9 @@
           "-o",
           "${fileDirname}/${fileBasenameNoExtension}",
           "-DALIGN=64",
-          "--std=c++11 -m64 -Wno-reorder"
+          "--std=c++11",
+          "-m64",
+          "-Wno-reorder"
         ],
         "options": {
           "cwd": "${workspaceFolder}"
