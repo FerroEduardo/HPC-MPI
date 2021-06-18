@@ -23,7 +23,7 @@ int main (int ac, char **av){
     double *A = NULL;
 
     posix_memalign(reinterpret_cast <void**>(&A), ALING, sizeof(double) * w * h);
-    input.open("mat-out.bin", fstream::binary | fstream::in );
+    input.open("mat-out.bin", fstream::binary | fstream::in);
     input.read(reinterpret_cast <char*>(A), sizeof(double) * w * h);
     input.close();
 

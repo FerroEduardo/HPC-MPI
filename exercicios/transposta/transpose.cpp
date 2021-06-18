@@ -49,7 +49,6 @@ void processaMatriz(double *A, int w, int h, int m_pid, int m_nprocs){
         }
     }
     // MPI_Barrier(MPI_COMM_WORLD);
-    cout << "acabou?" << endl;
 }
 
 void enviaMatriz(double *A, int w, int h, int m_pid, int m_nprocs){    
@@ -57,21 +56,13 @@ void enviaMatriz(double *A, int w, int h, int m_pid, int m_nprocs){
     MPI_Request m_request;
     int to_pid = m_pid + 1;
     int from_pid = m_pid - 1;
-    if (to_pid == 2)
-    {
-        return;
-    }
-    
-    cout << "to_pid: " << to_pid << endl;
     for (int j = 0; j < h; j++){
         for (int i = 0; i < w; i++){
             int k = j * w + i;
             MPI_Send(&A[k], sizeof(double), MPI_BYTE, to_pid, 0, MPI_COMM_WORLD);
-            cout << "enviou: " << A[k] << " para m_pid: " << to_pid << endl;
+            // cout << "enviou: " << A[k] << " para m_pid: " << to_pid << endl;
         }
     }
-    MPI_Barrier(MPI_COMM_WORLD);
-    cout << "acabou?" << endl;
 }
 
 void recebeMatriz(double *A, int w, int h, int m_pid, int m_nprocs){
@@ -86,22 +77,21 @@ void recebeMatriz(double *A, int w, int h, int m_pid, int m_nprocs){
             // cout << "recebeu: " << A[k] << " de m_pid: " << from_pid << endl;
         }
     }
-    MPI_Barrier(MPI_COMM_WORLD);
 }
 
-void save2file_text(double *m_buffer, int w, int h, string filename){
+void lerMatrizBinaria(double *m_buffer, int w, int h, string filename) {
+    fstream input;
+    input.open(filename, fstream::binary | fstream::in);
+    input.read(reinterpret_cast <char*>(m_buffer), sizeof(double) * w * h);
+    input.close();
+}
+
+void escreverMatrizBinaria(double *m_buffer, int w, int h, string filename) {
     fstream output;
     cout << "Salvando arquivo: " << filename << endl;
-    output.open(filename, fstream::out | fstream::trunc);
-    for (int i = 0; i < h; i++){
-        for (int j = 0; j < w; j++){
-            int p = i * w + j;
-            output << m_buffer[p] << " ";
-        }
-    output << endl;
-    }
-
-  output.close();
+    output.open(filename, fstream::binary | fstream::out | fstream::trunc);
+    output.write(reinterpret_cast <const char*>(m_buffer), sizeof(double) * w * h);
+    output.close();
 }
 
 void start(void){
@@ -132,21 +122,15 @@ void start(void){
   
     // h /= m_nprocs;
 
-    cout << "id: " << m_pid << " " << m_hostname << " offset " << m_pid * m_offset << endl;
-    posix_memalign(reinterpret_cast <void**>(&m_buffer)     , ALING, sizeof(double) * w * h);
-    posix_memalign(reinterpret_cast <void**>(&m_buffer_aux) , ALING, sizeof(double) * w * h);
-
+    cout << "id: " << m_pid << " " << m_hostname << " offset " << m_pid * w * h << endl;
     if ((m_pid % 2) == 0) {
-        for (uint64_t i = 0; i < (w * h); i++){
-            m_buffer[i] = static_cast<double>(i); //static_cast<double> (( rand() % 1000));
-        }
+        posix_memalign(reinterpret_cast <void**>(&m_buffer), ALING, sizeof(double) * w * h);
+        lerMatrizBinaria(m_buffer, w, h, "mat.bin");
         enviaMatriz(m_buffer, w, h, m_pid, m_nprocs);
     } else {
+        posix_memalign(reinterpret_cast <void**>(&m_buffer_aux), ALING, sizeof(double) * w * h);
         recebeMatriz(m_buffer_aux, w, h, m_pid, m_nprocs);
-        char* filename;
-        string str_obj(/*to_string(m_pid)+*/"mat-out.bin");
-        filename = &str_obj[0];
-        save2file_text(m_buffer_aux, w, h, str_obj);
+        escreverMatrizBinaria(m_buffer_aux, w, h, "mat-out.bin");
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
