@@ -16,17 +16,14 @@ void printMatrix(uint64_t w, uint64_t h, double *A){
         cout << endl;
     }//end-for (uint64_t j = 0; j < h; j++){
 }
-
 int main (int ac, char **av){
     fstream input;
     uint64_t w = 10,
              h = 10;
     double *A = NULL;
 
-    cout << av[1] << endl;
-
     posix_memalign(reinterpret_cast <void**>(&A), ALING, sizeof(double) * w * h);
-    input.open(av[1], fstream::binary | fstream::in );
+    input.open("mat-out.bin", fstream::binary | fstream::in );
     input.read(reinterpret_cast <char*>(A), sizeof(double) * w * h);
     input.close();
 

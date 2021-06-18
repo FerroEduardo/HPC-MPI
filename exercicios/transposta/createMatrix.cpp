@@ -23,7 +23,7 @@ int main (int ac, char **av){
     srand(42);
     posix_memalign(reinterpret_cast <void**>(&A), ALING, sizeof(double) * w * h);
     for (uint64_t i = 0; i < (w * h); i++){
-        A[i] = i; //static_cast<double> (( rand() % 1000));
+        A[i] = static_cast<double> (( rand() % 1000));
     }
 
     printMatrix(w, h, A);
