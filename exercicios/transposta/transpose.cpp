@@ -57,11 +57,10 @@ void enviaMatriz(double *A, int w, int h, int m_pid, int m_nprocs){
     int to_pid = m_pid + 1;
     int from_pid = m_pid - 1;
     for (int j = 0; j < h; j++){
-        for (int i = 0; i < w; i++){
-            int k = j * w + i;
-            MPI_Send(&A[k], sizeof(double), MPI_BYTE, to_pid, 0, MPI_COMM_WORLD);
-            // cout << "enviou: " << A[k] << " para m_pid: " << to_pid << endl;
-        }
+        int b = w * j;
+        double *B = A + b;
+        MPI_Send(B, sizeof(double) * w, MPI_BYTE, to_pid, 0, MPI_COMM_WORLD);
+        //envia vetor
     }
 }
 
@@ -71,10 +70,15 @@ void recebeMatriz(double *A, int w, int h, int m_pid, int m_nprocs){
     int to_pid = m_pid + 1;
     int from_pid = m_pid - 1;
     for (int j = 0; j < h; j++){
-        for (int i = 0; i < w; i++){
+        int b = w * j;
+        double *B;
+        posix_memalign(reinterpret_cast <void**>(&B), ALING, sizeof(double) * w);
+        MPI_Recv(B, sizeof(double) * w, MPI_BYTE, from_pid, 0, MPI_COMM_WORLD, &m_status);
+        //recebe vetor e muda a posição
+        for (int i = 0; i < w; i++) {
             int k = i * w + j;
-            MPI_Recv(&A[k], sizeof(double), MPI_BYTE, from_pid, 0, MPI_COMM_WORLD, &m_status);
-            // cout << "recebeu: " << A[k] << " de m_pid: " << from_pid << endl;
+            // cout << "A[k] = " << B[i] << endl;
+            A[k] = B[i];
         }
     }
 }
